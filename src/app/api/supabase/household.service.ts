@@ -24,6 +24,7 @@ export class HouseholdService {
     }
 
        
+    // database generates code
     async joinHousehold(inviteCode: string) {
         const { data, error } =
         await this.supabase.client.rpc('join_household',{

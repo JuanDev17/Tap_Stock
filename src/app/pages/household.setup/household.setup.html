@@ -1,0 +1,22 @@
+<section class="household-setup">
+  <h1>Welcome to TapStock</h1>
+  <p>Set up your household to start managing groceries together.</p>
+
+  <div class="household-actions">
+    <button (click)="mode = 'create'">
+      Create Household
+    </button>
+
+    <button (click)="mode = 'join'">
+      Join Household
+    </button>
+  </div>
+
+  @if (mode === 'create') {
+    <app-household-signup></app-household-signup>
+  }
+
+  @if (mode === 'join') {
+    <app-household-signup></app-household-signup>
+  }
+</section>
