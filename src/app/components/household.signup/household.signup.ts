@@ -1,9 +1,36 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
-  imports: [],
+  imports: [CommonModule, ReactiveFormsModule],
   selector: 'app-household-signup',
   styleUrl: './household.signup.scss',
   templateUrl: './household.signup.html',
 })
-export class HouseholdSignup {}
+export class HouseholdSignup {
+
+  @Input() mode: 'create' | 'join' = 'create';
+
+  // managing the field form 
+  householdName = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.minLength(2)]
+  });
+
+  //output
+  // emitting an event to the parent
+  // this.submitted.emit() 
+  @Output() submitted = new EventEmitter<string>();
+
+  submit(){
+    // household object exist even when user hasnt typed 
+    if(this.householdName.invalid){
+      this.householdName.markAsTouched();
+      return;
+    }
+
+    // this.householdName is FormControl Object - not actual txt
+    this.submitted.emit(this.householdName.value);
+  }
+}

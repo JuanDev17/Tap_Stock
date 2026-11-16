@@ -6,7 +6,7 @@ import { List } from './components/list/list';
 import { Dashboard } from './pages/dashboard/dashboard';1
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, HeaderComponent, List, Dashboard],
+  imports: [RouterOutlet, CommonModule, HeaderComponent, List, Dashboard, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -16,6 +16,14 @@ type HouseholdType = 'create' | 'join'
 
 export class HouseholdSetup {
 
+  // passing to parent
   mode: HouseholdType = 'create';
 
+  createSubmit(householdName: string){
+
+  }
+
+  joinSubmit(inviteCode: string){
+
+  }
 }

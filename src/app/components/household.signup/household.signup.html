@@ -1,1 +1,18 @@
-<p>household.signup works!</p>
+<form>
+  <label for="householdName">Household Name</label>
+
+  <input
+    id="householdName"
+    type="text"
+    [formControl]="householdName"
+    placeholder="e.g. The Smith Family"
+  />
+
+  @if (householdName.touched && householdName.invalid) {
+    <small>Please enter a household name (at least 2 characters).</small>
+  }
+
+  <button type="submit" [disabled]="householdName.invalid">
+    Create Household
+  </button>
+</form>
