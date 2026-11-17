@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HouseholdSetup } from './pages/household.setup/household.setup';
+import { EmailSetup } from './pages/email-setup/email-setup';
 
 export const routes: Routes = [
   {
@@ -10,6 +11,10 @@ export const routes: Routes = [
   {
     path: 'household/setup',
     component: HouseholdSetup
+  },
+  {
+    path: 'signin',
+    component: EmailSetup
   },
   {
     path: '**',

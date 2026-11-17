@@ -22,3 +22,15 @@
     <app-household-signup [mode]="mode" (submitted)="joinSubmit($event)"></app-household-signup>
   }
 </section>
+
+@if (isLoading) {
+  <p>Processing your request...</p>
+}
+
+@if (successMessage) {
+  <p>{{ successMessage }}</p>
+}
+
+@if (errorMessage) {
+  <p>{{ errorMessage }}</p>
+}

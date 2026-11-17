@@ -35,7 +35,7 @@ export class AuthService {
                 // numeric code user received 
                 token: code,
                 // type tells supabase which OTP flow to use
-                type: email
+                type: 'email'
             });
 
             if(error){

@@ -24,11 +24,14 @@ export class HouseholdSignup {
   @Output() submitted = new EventEmitter<string>();
 
   submit(){
+      console.log('starting:',);
+
     // household object exist even when user hasnt typed 
     if(this.householdName.invalid){
       this.householdName.markAsTouched();
       return;
     }
+  console.log('Emitting:', this.householdName.value);
 
     // this.householdName is FormControl Object - not actual txt
     this.submitted.emit(this.householdName.value);

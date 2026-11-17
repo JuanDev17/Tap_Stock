@@ -1,18 +1,24 @@
 <form>
-  <label for="householdName">Household Name</label>
+  <label for="householdName">
+    {{ mode === 'create' ? 'Household Name' : 'Invitation Code' }}
+  </label>
 
   <input
     id="householdName"
     type="text"
     [formControl]="householdName"
-    placeholder="e.g. The Smith Family"
+    [placeholder]="mode === 'create' ? 'e.g. The Smith Family' : 'Enter invitation code'"
   />
 
   @if (householdName.touched && householdName.invalid) {
-    <small>Please enter a household name (at least 2 characters).</small>
+    <small>Please enter a valid value.</small>
   }
 
-  <button type="submit" [disabled]="householdName.invalid">
-    Create Household
+  <button
+    type="button"
+    (click)="submit()"
+    [disabled]="householdName.invalid"
+  >
+    {{ mode === 'create' ? 'Create Household' : 'Join Household' }}
   </button>
 </form>
