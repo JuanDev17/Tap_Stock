@@ -13,7 +13,7 @@
     <small>Please enter a valid email address.</small>
   }
 
-  <button type="submit" [disabled]="email.invalid">
+  <button type="submit" (click)="submit()" [disabled]="email.invalid">
     Continue
   </button>
 

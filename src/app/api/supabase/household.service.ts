@@ -38,6 +38,36 @@ export class HouseholdService {
         return data;
     }
 
+    // checking if user belongs to a household 
+    // Check whether the current user belongs to a household
+async hasHousehold(): Promise<boolean> {
+
+    const { data: { user }, error: userError } =
+        await this.supabase.client.auth.getUser();
+
+    if (userError) {
+        throw userError;
+    }
+
+    if (!user) {
+        return false;
+    }
+
+    const { data, error } =
+        await this.supabase.client
+            .from('household_members')
+            .select('household_id')
+            .eq('user_id', user.id)
+            .limit(1)
+            .maybeSingle();
+
+    if (error) {
+        throw error;
+    }
+
+    // Membership exists = household setup completed
+    return !!data;
+}
 
 
 }
