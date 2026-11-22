@@ -1,19 +1,19 @@
-<form (ngSubmit)="submit()">
+<form [formGroup]="form" (ngSubmit)="submit()">
 
   <label for="email">Email Address</label>
 
   <input
     id="email"
     type="email"
-    [formControl]="email"
+    formControlName="email"
     placeholder="you@example.com"
   />
 
-  @if (email.touched && email.invalid) {
+  @if (form.controls.email.touched && form.controls.email.invalid) {
     <small>Please enter a valid email address.</small>
   }
 
-  <button type="submit" (click)="submit()" [disabled]="email.invalid">
+  <button type="submit" [disabled]="form.invalid || disabled">
     Continue
   </button>
 

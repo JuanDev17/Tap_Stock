@@ -1,13 +1,14 @@
 <section class="email-setup">
   <h1>Welcome to TapStock</h1>
-  <p>Enter your email to receive a verification code.</p>
+  <p>Enter your email to receive a sign-in link.</p>
 
   <app-email-signup
+    [disabled]="isLoading"
     (submitted)="emailSubmit($event)">
   </app-email-signup>
 
   @if (isLoading) {
-    <p>Sending verification code...</p>
+    <p>Sending sign-in link...</p>
   }
 
   @if (successMessage) {

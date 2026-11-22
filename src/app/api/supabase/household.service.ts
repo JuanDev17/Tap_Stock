@@ -5,6 +5,34 @@ import { SupabaseService } from './supabase';
 export class HouseholdService {
     private supabase = inject(SupabaseService);
 
+    async getInviteCode(): Promise<string | null> {
+        const { data, error: sessionError } =
+            await this.supabase.client.auth.getSession();
+
+        if (sessionError) {
+            throw sessionError;
+        }
+
+        const user = data.session?.user;
+        if (!user) {
+            return null;
+        }
+
+        const { data: household, error: householdError } =
+            await this.supabase.client
+                .from('households')
+                .select('invite_code')
+                .eq('created_by', user.id)
+                .limit(1)
+                .maybeSingle();
+
+        if (householdError) {
+            throw householdError;
+        }
+
+        return household?.invite_code ?? null;
+    }
+
     // rpc - remote procedure call
     // built in supabase method to execute PostgreSQL functions
     // aka stored procedure

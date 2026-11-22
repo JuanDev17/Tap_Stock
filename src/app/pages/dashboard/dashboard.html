@@ -2,6 +2,24 @@
     <app-header />
 </section>
 
+@if (isLoadingInviteCode()) {
+  <p>Loading invite code...</p>
+}
+
+@if (inviteCode(); as code) {
+  <section class="household-invite">
+    <p>Share your household invite code:</p>
+    <strong>{{ code }}</strong>
+    <button type="button" (click)="copyInviteCode()">
+      {{ copiedInviteCode() ? 'Copied!' : 'Copy invite code' }}
+    </button>
+  </section>
+}
+
+@if (inviteCodeError()) {
+  <p>{{ inviteCodeError() }}</p>
+}
+
 <section class="main-container">
     <app-list></app-list>
 
