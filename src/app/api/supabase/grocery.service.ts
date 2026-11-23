@@ -28,4 +28,10 @@ export class GroceryService {
         )
     }
 
+    // ADD METHOD 
+    addGroceryItem(
+        item: Omit<GroceryItem, 'id'>,
+        (),
+    )
+
 }
