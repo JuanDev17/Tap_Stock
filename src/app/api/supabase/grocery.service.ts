@@ -30,8 +30,31 @@ export class GroceryService {
 
     // ADD METHOD 
     addGroceryItem(
-        item: Omit<GroceryItem, 'id'>,
-        (),
-    )
+        item: Omit<GroceryItem, 'id'>
+    ): Observable<GroceryItem> {
+
+
+        return from(
+            this.supabase.client
+            .from('grocery_items')
+            // adding to the table 
+            .insert(item)
+            .select()
+            .single()
+            // pipe transforms
+        ).pipe(
+            // map creates new array, 
+            map(({ data, error }) => {
+                if(error){
+                    throw error;
+                }
+
+                return data as GroceryItem;
+            })
+        )
+    }
+
+    // EDIT 
+    
 
 }
