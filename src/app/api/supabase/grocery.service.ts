@@ -55,6 +55,22 @@ export class GroceryService {
     }
 
     // EDIT 
-    
+    deleteGroceryItem(
+        item: GroceryItem
+    ): Observable<GroceryItem> {
+
+        return from(
+            this.supabase.client
+            .from('grocery_items')
+            .delete()
+            .eq('id', id)
+            .select()
+            .single()
+
+        )
+    }
+
+    // DELETE 
+
 
 }
