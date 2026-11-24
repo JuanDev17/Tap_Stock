@@ -1,5 +1,5 @@
 
-name: Deploy TapStock to GitHub Pages
+name: Deploy TapStock
 
 on:
   push:
@@ -12,17 +12,13 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: github-pages
-  cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -33,28 +29,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Angular application
-        run: npx ng build --configuration production --base-href "/YOUR-REPOSITORY-NAME/"
+      - name: Build Angular
+        run: npx ng build --configuration production --base-href "/Tap_Stock_Ui-/"
 
-      - name: Prepare deployment files
+      - name: Prepare deployment
         run: |
+          BUILD_DIR=$(find dist -type f -name index.html -print -quit | xargs dirname)
+          test -n "$BUILD_DIR"
           mkdir -p pages-artifact
-
-          if [ -d dist/YOUR-ANGULAR-PROJECT-NAME/browser ]; then
-            cp -R dist/YOUR-ANGULAR-PROJECT-NAME/browser/. pages-artifact/
-          else
-            cp -R dist/YOUR-ANGULAR-PROJECT-NAME/. pages-artifact/
-          fi
-
+          cp -R "$BUILD_DIR"/. pages-artifact/
           touch pages-artifact/.nojekyll
 
-      - name: Configure GitHub Pages
+      - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload deployment artifact
-        uses: actions/upload-pages-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: pages-artifact
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         uses: actions/deploy-pages@v4
