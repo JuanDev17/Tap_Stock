@@ -12,6 +12,10 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -30,23 +34,20 @@ jobs:
         run: npm ci
 
       - name: Build Angular
-        run: npx ng build --configuration production --base-href "/Tap_Stock_Ui-/"
+        run: npx ng build Tap-Stock --configuration production --base-href "/Tap_Stock_Ui-/"
 
-      - name: Prepare deployment
+      - name: Verify build
         run: |
-          BUILD_DIR=$(find dist -type f -name index.html -print -quit | xargs dirname)
-          test -n "$BUILD_DIR"
-          mkdir -p pages-artifact
-          cp -R "$BUILD_DIR"/. pages-artifact/
-          touch pages-artifact/.nojekyll
+          ls -la dist/Tap-Stock/browser
+          test -f dist/Tap-Stock/browser/index.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
-          path: pages-artifact
+          path: dist/Tap-Stock/browser
 
       - name: Deploy
         uses: actions/deploy-pages@v4
