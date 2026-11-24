@@ -36,10 +36,14 @@ jobs:
       - name: Build Angular
         run: npx ng build Tap-Stock --configuration production --base-href "/Tap_Stock_Ui-/"
 
+      - name: Add GitHub Pages route fallback
+        run: cp dist/Tap-Stock/browser/index.html dist/Tap-Stock/browser/404.html
+
       - name: Verify build
         run: |
           ls -la dist/Tap-Stock/browser
           test -f dist/Tap-Stock/browser/index.html
+          test -f dist/Tap-Stock/browser/404.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
