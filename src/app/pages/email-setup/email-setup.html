@@ -7,15 +7,15 @@
     (submitted)="emailSubmit($event)">
   </app-email-signup>
 
-  @if (isLoading) {
-    <p>Sending sign-in link...</p>
+  @if (isLoading()) {
+    <p role="status" aria-live="polite">Sending sign-in link...</p>
   }
 
-  @if (successMessage) {
-    <p>{{ successMessage }}</p>
+  @if (successMessage()) {
+    <p role="status" aria-live="polite">{{ successMessage() }}</p>
   }
 
-  @if (errorMessage) {
-    <p>{{ errorMessage }}</p>
+  @if (errorMessage()) {
+    <p role="alert">{{ errorMessage() }}</p>
   }
 </section>

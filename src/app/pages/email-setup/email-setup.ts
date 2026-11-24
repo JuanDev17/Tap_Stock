@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { EmailSignup } from '../../components/email-signup/email-signup';
 import { AuthService } from '../../api/supabase/auth.service';
 
@@ -11,27 +11,27 @@ import { AuthService } from '../../api/supabase/auth.service';
 export class EmailSetup {
   #authService = inject(AuthService);
 
-  isLoading = false;
-  errorMessage = '';
-  successMessage = '';
+  isLoading = signal(false);
+  errorMessage = signal('');
+  successMessage = signal('');
 
   async emailSubmit(email: string): Promise<void> {
-    if (this.isLoading) return;
+    if (this.isLoading()) return;
 
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     try {
       await this.#authService.sendSignInLink(email);
-      this.successMessage = 'Sign-in email sent. Check your inbox and spam folder.';
+      this.successMessage.set('Sign-in email sent. Check your inbox and spam folder.');
     } catch (error) {
       console.error('Email submission failed:', error);
-      this.errorMessage = error instanceof Error
+      this.errorMessage.set(error instanceof Error
         ? error.message
-        : 'Unable to send sign-in email.';
+        : 'Unable to send sign-in email.');
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
   }
 }

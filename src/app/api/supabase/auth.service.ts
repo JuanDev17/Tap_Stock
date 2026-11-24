@@ -16,8 +16,9 @@ private householdService = inject(HouseholdService);
   async sendSignInLink(email: string): Promise<void> {
     const { error } = await this.supabase.client.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: globalThis.location.origin }
-    });
+    // Use Angular's base URL so deployed subpath apps redirect back correctly.
+    options: { emailRedirectTo: globalThis.document.baseURI }
+  });
 
     if (error) throw error;
   }
