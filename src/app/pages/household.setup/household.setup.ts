@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HouseholdSignup } from '../../components/household.signup/household.signup';
 import { HouseholdService } from '../../api/supabase/household.service';
@@ -6,7 +7,7 @@ import { HouseholdService } from '../../api/supabase/household.service';
 type HouseholdType = 'create' | 'join';
 
 @Component({
-  imports: [HouseholdSignup],
+  imports: [HouseholdSignup, ReactiveFormsModule],
   selector: 'app-household-setup',
   styleUrl: './household.setup.scss',
   templateUrl: './household.setup.html',
@@ -18,6 +19,11 @@ export class HouseholdSetup {
   #householdService = inject(HouseholdService);
   #router = inject(Router);
 
+  fullName = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.minLength(2)]
+  });
+
   // isLoading so user dont submit twice
   isLoading = false;
   errorMessage = '';
@@ -25,8 +31,9 @@ export class HouseholdSetup {
 
   // async returns a Promise
   async createSubmit(householdName: string): Promise<void> {
-    console.log('Parent received household:', householdName);
     if (this.isLoading) return;
+    const fullName = this.getFullName();
+    if (!fullName) return;
 
     this.isLoading = true;
     this.errorMessage = '';
@@ -35,6 +42,7 @@ export class HouseholdSetup {
     // try whats in the block
     try {
       await this.#householdService.createhousehold(householdName);
+      await this.#householdService.saveCurrentMemberName(fullName);
       this.successMessage = 'Household created successfully!';
       await this.#router.navigate(['/dashboard']);
     } 
@@ -51,6 +59,8 @@ export class HouseholdSetup {
 
   async joinSubmit(inviteCode: string): Promise<void> {
     if (this.isLoading) return;
+    const fullName = this.getFullName();
+    if (!fullName) return;
 
     this.isLoading = true;
     this.errorMessage = '';
@@ -58,6 +68,7 @@ export class HouseholdSetup {
 
     try {
       await this.#householdService.joinHousehold(inviteCode);
+      await this.#householdService.saveCurrentMemberName(fullName);
       this.successMessage = 'Successfully joined household!';
       await this.#router.navigate(['/dashboard']);
     } catch (error) {
@@ -66,5 +77,17 @@ export class HouseholdSetup {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private getFullName(): string | null {
+    const fullName = this.fullName.value.trim();
+
+    if (fullName.length < 2) {
+      this.fullName.setErrors({ minlength: true });
+      this.fullName.markAsTouched();
+      return null;
+    }
+
+    return fullName;
   }
 }

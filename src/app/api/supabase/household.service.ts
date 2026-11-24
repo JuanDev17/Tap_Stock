@@ -66,6 +66,24 @@ export class HouseholdService {
         return data;
     }
 
+    async saveCurrentMemberName(fullName: string): Promise<void> {
+        const { data: { user }, error: userError } =
+            await this.supabase.client.auth.getUser();
+
+        if (userError) throw userError;
+        if (!user) throw new Error('You must be signed in to save your name.');
+
+        // Store the display name on this user's household membership.
+        const { error } = await this.supabase.client
+            .from('household_members')
+            .update({ full_name: fullName.trim() })
+            .eq('user_id', user.id)
+            .select('user_id')
+            .single();
+
+        if (error) throw error;
+    }
+
     // checking if user belongs to a household 
     // Check whether the current user belongs to a household
 async hasHousehold(): Promise<boolean> {

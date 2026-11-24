@@ -44,10 +44,6 @@ export class AddNew implements OnChanges {
       nonNullable: true
     }),
 
-    addedBy: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required]
-    })
   });
  
   // item supplied by parent ( selected item )
@@ -76,7 +72,6 @@ ngOnChanges(): void {
     quantity: existingForm.quantity,
     unit: existingForm.unit,
     note: existingForm.note || '',
-    addedBy: existingForm.addedBy
   });
 
 }
@@ -110,7 +105,6 @@ onSubmit(): void {
     quantity: values.quantity,
     unit: values.unit,
     note: values.note.trim(),
-    addedBy: values.addedBy,
   }
 
   // // form values become an object, 
@@ -127,7 +121,15 @@ onSubmit(): void {
   //   createdAt: new Date().toISOString()
   // };
 
-  const savedItem: GroceryItem = existingItem ? { ...existingItem, ...editableFields } : { ...editableFields, id: crypto.randomUUID(), isCompleted: false, createdAt: new Date().toISOString() };
+  const savedItem: GroceryItem = existingItem
+    ? { ...existingItem, ...editableFields }
+    : {
+        ...editableFields,
+        id: crypto.randomUUID(),
+        addedBy: '',
+        isCompleted: false,
+        createdAt: new Date().toISOString()
+      };
 
   // emitting grocery object to the parent component being passed via itemAdded prop
   this.itemAdded.emit(savedItem);
@@ -145,7 +147,6 @@ resetForm(): void {
     quantity: 1,
     unit: 'each',
     note: '',
-    addedBy: ''
   })
 };
 

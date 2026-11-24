@@ -1,6 +1,15 @@
 
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatAnchor, MatButtonModule } from '@angular/material/button';
 import { ListCard } from '../list-card/list-card';
@@ -10,6 +19,7 @@ import {
   UsualItem
 } from '../../api/types/grocery.type';
 import { AddNew } from '../add-new/add-new';
+import { GroceryService } from '../../api/supabase/grocery.service';
 
 @Component({
   selector: 'app-list',
@@ -24,25 +34,48 @@ import { AddNew } from '../add-new/add-new';
   ],
   templateUrl: './list.html',
   styleUrl: './list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class List {
+export class List implements OnInit {
 
-  selectedItem: GroceryItem | null = null;
+  readonly groceryService = inject(GroceryService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  // Your existing mock grocery items
-  groceryItems: GroceryItem[] = [
-    {
-      id: '1',
-      title: 'Eggs',
-      quantity: 2,
-      unit: 'dozen',
-      addedBy: 'Juan',
-      isCompleted: false,
-      createdAt: new Date().toISOString()
-    }
-  ];
+  groceryItems = signal<GroceryItem[]>([]);
+  selectedItem = signal<GroceryItem | null>(null);
+  loadError = signal('');
 
-  // Your usual grocery presets
+  readonly itemCount = computed(() =>
+    this.groceryItems().filter(item => !item.isCompleted).length
+  );
+  readonly completedItems = computed(() =>
+    this.groceryItems().filter(item => item.isCompleted)
+  );
+  readonly activeItems = computed(() =>
+    this.groceryItems().filter(item => !item.isCompleted)
+  );
+  readonly pickedUpMessage = computed(() => {
+    const completed = this.completedItems();
+    return completed.length === 1
+      ? `${completed[0].title} picked up!`
+      : `${completed.length} items picked up!`;
+  });
+
+  ngOnInit(): void {
+    this.loadGroceryItems();
+
+    // Reload the household list whenever Supabase broadcasts a table change.
+    this.groceryService.watchGroceryItemChanges()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.loadGroceryItems(),
+        error: error => {
+          console.error('Grocery realtime updates failed:', error);
+          this.loadError.set('Live grocery updates are unavailable.');
+        }
+      });
+  }
+
   usualItems: UsualItem[] = [
     {
       id: 'apples',
@@ -60,109 +93,113 @@ export class List {
     }
   ];
 
-  get itemCount(): number {
-    return this.groceryItems.filter(
-      item => !item.isCompleted
-    ).length;
-  }
+addUsualItem(item: UsualItem): void {
+  // The database has no usual_item_id column, so avoid duplicates by name.
+  const alreadyAdded = this.groceryItems().some(
+    grocery => grocery.title.trim().toLowerCase() === item.title.toLowerCase()
+  );
 
-  addUsualItem(item: UsualItem): void {
+  if (alreadyAdded) return;
 
-    const exists = this.groceryItems.some(
-      grocery => grocery.usualItemId === item.id
-    );
-
-    if (exists) return;
-
-    const newItem: GroceryItem = {
-      id: crypto.randomUUID(),
-      usualItemId: item.id,
-      title: item.title,
-      quantity: item.quantity,
-      unit: item.unit,
-      addedBy: 'Juan',
-      isCompleted: false,
-      createdAt: new Date().toISOString()
-    };
-
-    this.groceryItems = [
-      ...this.groceryItems,
-      newItem
-    ];
-  }
-
-  get completedItems(): GroceryItem[] {
-  return this.groceryItems.filter(item => item.isCompleted);
+  this.groceryService.addGroceryItem({
+    title: item.title,
+    quantity: item.quantity,
+    unit: item.unit,
+    addedBy: '',
+    isCompleted: false,
+    createdAt: new Date().toISOString()
+  }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    next: savedItem => this.groceryItems.update(items => [...items, savedItem]),
+    error: error => console.error('Could not add grocery item:', error)
+  });
 }
-
-get activeItems(): GroceryItem[] {
-  return this.groceryItems.filter(item => !item.isCompleted);
-}
-
-get pickedUpMessage(): string {
-  if (this.completedItems.length === 1) {
-    return `${this.completedItems[0].title} picked up!`;
-  }
-
-  return `${this.completedItems.length} items picked up!`;
-}
-
 
 onCompletedChange(id: string, completed: boolean): void {
-  this.groceryItems = this.groceryItems.map(item =>
-    item.id === id
-      ? { ...item, isCompleted: completed }
-      : item
-  );
+  this.updateItem(id, { isCompleted: completed });
 }
 
-
-
 onQuantityChange(id: string, quantity: number): void {
-  console.log('STEP 3: Parent received', id, quantity);
-
   if (!Number.isInteger(quantity) || quantity < 1) {
     return;
   }
 
-  this.groceryItems = this.groceryItems.map(item =>
-    item.id === id
-      ? { ...item, quantity }
-      : item
-  );
+  this.updateItem(id, { quantity });
 }
 
-// parent saves the item from child component AddNew, 
-// which emits the item via itemAdded output
 saveItem(item: GroceryItem): void {
+  if (this.selectedItem()) {
+    const { id, ...changes } = item;
 
-// check if the item already exists in the groceryItems array
-  const existingIndex = this.groceryItems.findIndex(
-    grocery => grocery.id === item.id
-  );
-
-  // 
-  if (existingIndex === -1) {
-    this.groceryItems = [...this.groceryItems, item];
-  } else {
-    this.groceryItems = this.groceryItems.map(grocery =>
-      grocery.id === item.id ? item : grocery
-    );
+    this.groceryService.editGroceryItem(id, changes)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+      next: savedItem => {
+        this.replaceItem(savedItem);
+        this.selectedItem.set(null);
+      },
+      error: error => console.error('Could not edit grocery item:', error)
+    });
+    return;
   }
 
-  this.selectedItem = null;
+  const { id, ...newItem } = item;
+
+  this.groceryService.addGroceryItem(newItem)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+    next: savedItem => {
+      this.groceryItems.update(items => [...items, savedItem]);
+      this.selectedItem.set(null);
+    },
+    error: error => console.error('Could not add grocery item:', error)
+  });
 }
 
 startEditing(item: GroceryItem): void {
-  this.selectedItem = item;
+  this.selectedItem.set(item);
 }
 
 deleteItem(id: string): void {
-  // !== strict inequality 
-  // updating groceryItems - filtering out 
-  this.groceryItems = this.groceryItems.filter(item => item.id !== id)
+  this.groceryService.deleteGroceryItem(id)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+    next: () => {
+      this.groceryItems.update(items => items.filter(item => item.id !== id));
+    },
+    error: error => console.error('Could not delete grocery item:', error)
+  });
 }
 
+private updateItem(
+  id: string,
+  changes: Partial<Omit<GroceryItem, 'id'>>
+): void {
+  this.groceryService.editGroceryItem(id, changes)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+    next: savedItem => this.replaceItem(savedItem),
+    error: error => console.error('Could not update grocery item:', error)
+  });
+}
 
+private replaceItem(savedItem: GroceryItem): void {
+  this.groceryItems.update(items =>
+    items.map(item => item.id === savedItem.id ? savedItem : item)
+  );
+}
 
+private loadGroceryItems(): void {
+  this.groceryService.getGroceryItems()
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: items => {
+        this.groceryItems.set(items);
+        this.loadError.set('');
+      },
+      error: error => {
+        console.error('Could not load grocery items:', error);
+        this.loadError.set('Could not load grocery items. Please try again.');
+      }
+    });
+}
 }
