@@ -20,7 +20,7 @@ export class Tags {
 
   isAdded(item: UsualItem): boolean {
     return this.existingItems().some(
-      grocery => grocery.usualItemId === item.id
+      grocery => grocery.title.trim().toLowerCase() === item.title.toLowerCase()
     );
   }
 }

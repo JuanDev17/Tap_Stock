@@ -2,6 +2,20 @@
   <h1>Welcome to TapStock</h1>
   <p>Set up your household to start managing groceries together.</p>
 
+  <div class="name-field">
+    <label for="fullName">Your name</label>
+    <input
+      id="fullName"
+      type="text"
+      [formControl]="fullName"
+      placeholder="e.g. Juan Aviles"
+      autocomplete="name"
+    />
+    @if (fullName.touched && fullName.invalid) {
+      <small>Please enter your name (at least 2 characters).</small>
+    }
+  </div>
+
   <div class="household-actions">
     <button (click)="mode = 'create'">
       Create Household

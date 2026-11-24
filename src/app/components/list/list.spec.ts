@@ -1,17 +1,45 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NEVER, of } from 'rxjs';
+import { vi } from 'vitest';
+import { GroceryItem } from '../../api/types/grocery.type';
+import { GroceryService } from '../../api/supabase/grocery.service';
 import { List } from './list';
 
 describe('List', () => {
   let component: List;
   let fixture: ComponentFixture<List>;
+  const eggs: GroceryItem = {
+    id: '1',
+    title: 'Eggs',
+    quantity: 2,
+    unit: 'dozen',
+    addedBy: 'Juan',
+    isCompleted: false,
+    createdAt: new Date().toISOString()
+  };
+  let groceryService: {
+    getGroceryItems: ReturnType<typeof vi.fn>;
+    watchGroceryItemChanges: ReturnType<typeof vi.fn>;
+    editGroceryItem: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
+    groceryService = {
+      getGroceryItems: vi.fn(() => of([eggs])),
+      watchGroceryItemChanges: vi.fn(() => NEVER),
+      editGroceryItem: vi.fn((_id: string, changes: Partial<GroceryItem>) =>
+        of({ ...eggs, ...changes })
+      )
+    };
+
     await TestBed.configureTestingModule({
       imports: [List],
+      providers: [{ provide: GroceryService, useValue: groceryService }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(List);
     component = fixture.componentInstance;
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 
@@ -26,19 +54,20 @@ describe('List', () => {
       fixture.nativeElement.querySelector('.quantity-button:last-child');
     increaseButton.click();
 
-    expect(component.groceryItems[0].quantity).toBe(3);
+    expect(component.groceryItems()[0].quantity).toBe(3);
   });
 
   it('shows completed items in the picked-up section instead of active items', () => {
-    component.groceryItems.push({
+    const milk: GroceryItem = {
       id: '2',
       title: 'Milk',
       quantity: 1,
-      unit: 'carton',
+      unit: 'bottle',
       addedBy: 'Juan',
       isCompleted: false,
       createdAt: new Date().toISOString()
-    });
+    };
+    component.groceryItems.set([...component.groceryItems(), milk]);
 
     component.onCompletedChange('1', true);
     fixture.detectChanges();
