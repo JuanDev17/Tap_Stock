@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { SupabaseService } from './supabase';
 import { HouseholdService } from './household.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -16,8 +17,7 @@ private householdService = inject(HouseholdService);
   async sendSignInLink(email: string): Promise<void> {
     const { error } = await this.supabase.client.auth.signInWithOtp({
       email: email.trim(),
-    // Use Angular's base URL so deployed subpath apps redirect back correctly.
-    options: { emailRedirectTo: globalThis.document.baseURI }
+    options: { emailRedirectTo: `${environment.appUrl}/` }
   });
 
     if (error) throw error;
