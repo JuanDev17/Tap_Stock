@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
-import { MatAnchor, MatButtonModule } from '@angular/material/button';
 import { ListCard } from '../list-card/list-card';
 import { Tags } from '../tags/tags';
 import {
@@ -27,8 +26,6 @@ import { GroceryService } from '../../api/supabase/grocery.service';
     CommonModule,
     MatIconModule,
     ListCard,
-    MatAnchor,
-    MatButtonModule,
     Tags,
     AddNew
   ],
