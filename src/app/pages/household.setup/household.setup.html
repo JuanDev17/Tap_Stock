@@ -17,11 +17,19 @@
   </div>
 
   <div class="household-actions">
-    <button (click)="mode = 'create'">
+    <button
+      type="button"
+      [attr.aria-pressed]="mode === 'create'"
+      (click)="mode = 'create'"
+    >
       Create Household
     </button>
 
-    <button (click)="mode = 'join'">
+    <button
+      type="button"
+      [attr.aria-pressed]="mode === 'join'"
+      (click)="mode = 'join'"
+    >
       Join Household
     </button>
   </div>
