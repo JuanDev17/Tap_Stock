@@ -9,10 +9,40 @@
 @if (inviteCode(); as code) {
   <section class="household-invite">
     <p>Share your household invite code:</p>
-    <strong>{{ code }}</strong>
-    <button type="button" (click)="copyInviteCode()">
-      {{ copiedInviteCode() ? 'Copied!' : 'Copy invite code' }}
-    </button>
+
+    <div class="invite-actions">
+      <div class="invite-code">
+        @if (isInviteCodeVisible()) {
+          <strong>{{ code }}</strong>
+        } @else {
+          <strong>{{ '•'.repeat(code.length) }}</strong>
+        }
+
+        <button
+          class="visibility-button"
+          mat-icon-button
+          type="button"
+          (click)="toggleInviteCodeVisibility()"
+          aria-label="Toggle invite code visibility"
+          [attr.aria-pressed]="isInviteCodeVisible()"
+        >
+          <mat-icon>
+            {{ isInviteCodeVisible() ? 'visibility_off' : 'visibility' }}
+          </mat-icon>
+        </button>
+      </div>
+
+      <button
+        class="copy-button"
+        mat-icon-button
+        type="button"
+        (click)="copyInviteCode()"
+        aria-label="Copy invite code"
+        title="Copy invite code"
+      >
+        <mat-icon aria-hidden="true">content_copy</mat-icon>
+      </button>
+    </div>
   </section>
 }
 

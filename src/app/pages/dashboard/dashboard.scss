@@ -1,0 +1,84 @@
+.household-invite {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.household-invite > p {
+  margin: 0;
+  color: #53605a;
+  font-weight: 500;
+}
+
+.invite-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.invite-code {
+  min-width: 150px;
+  min-height: 44px;
+  padding: 0 6px 0 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #d5ded8;
+  border-radius: 10px;
+  background: #fff;
+  color: #263c31;
+  box-sizing: border-box;
+}
+
+.invite-code strong {
+  font-family: monospace;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
+
+.visibility-button {
+  color: #456b55;
+}
+
+.visibility-button:hover {
+  background: #edf4ef;
+}
+
+.copy-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #315d43;
+  color: #fff;
+}
+
+.copy-button:hover {
+  background: #264b35;
+}
+
+@media (max-width: 600px) {
+  .household-invite {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .invite-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .invite-code {
+    min-width: 0;
+    flex: 1;
+  }
+}
