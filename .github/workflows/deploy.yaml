@@ -34,7 +34,7 @@ jobs:
         run: npm ci
 
       - name: Build Angular
-        run: npx ng build Tap-Stock --configuration production --base-href "/Tap_Stock_Ui/"
+        run: npx ng build Tap-Stock --configuration production --base-href "/Tap_Stock/"
 
       - name: Add GitHub Pages route fallback
         run: cp dist/Tap-Stock/browser/index.html dist/Tap-Stock/browser/404.html
