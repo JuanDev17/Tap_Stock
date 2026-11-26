@@ -1,0 +1,38 @@
+.email-setup {
+  width: min(100% - 32px, 430px);
+  margin: clamp(48px, 12vh, 120px) auto;
+  padding: clamp(24px, 6vw, 40px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-card);
+  background: var(--bg-card);
+  box-shadow: 0 16px 40px rgb(73 59 54 / 8%);
+  box-sizing: border-box;
+}
+
+.email-setup h1 {
+  margin: 0 0 8px;
+  color: var(--text-primary);
+  font-size: clamp(1.6rem, 5vw, 2rem);
+  line-height: 1.2;
+}
+
+.email-setup > p {
+  margin: 0 0 24px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.email-setup > p[role='status'],
+.email-setup > p[role='alert'] {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--bg-success);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.email-setup > p[role='alert'] {
+  background: #fff0ed;
+  color: #a63d4b;
+}

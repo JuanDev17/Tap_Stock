@@ -1,20 +1,26 @@
-<form>
+<form class="household-signup-form">
   <label for="householdName">
     {{ mode === 'create' ? 'Household Name' : 'Invitation Code' }}
   </label>
 
   <input
+    class="household-signup-input"
     id="householdName"
     type="text"
     [formControl]="householdName"
+    [autocomplete]="mode === 'create' ? 'organization' : 'off'"
+    [attr.aria-label]="mode === 'create' ? 'Household name' : 'Invitation code'"
     [placeholder]="mode === 'create' ? 'e.g. The Smith Family' : 'Enter invitation code'"
   />
 
   @if (householdName.touched && householdName.invalid) {
-    <small>Please enter a valid value.</small>
+    <small class="form-error" role="alert">
+      {{ mode === 'create' ? 'Enter a household name with at least 2 characters.' : 'Enter a valid invitation code.' }}
+    </small>
   }
 
   <button
+    class="household-submit-button"
     type="button"
     (click)="submit()"
     [disabled]="householdName.invalid"
