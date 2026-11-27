@@ -67,21 +67,21 @@ export class HouseholdService {
     }
 
     async saveCurrentMemberName(fullName: string): Promise<void> {
-        const { data: { user }, error: userError } =
-            await this.supabase.client.auth.getUser();
+        const name = fullName.trim();
+        if (name.length < 2) {
+            throw new Error('Name must contain at least 2 characters.');
+        }
 
-        if (userError) throw userError;
-        if (!user) throw new Error('You must be signed in to save your name.');
-
-        // Store the display name on this user's household membership.
-        const { error } = await this.supabase.client
-            .from('household_members')
-            .update({ full_name: fullName.trim() })
-            .eq('user_id', user.id)
-            .select('user_id')
-            .single();
+        // The RPC safely writes this user's name without a broad client UPDATE policy.
+        const { data: savedName, error } = await this.supabase.client.rpc(
+            'set_household_member_name',
+            { _full_name: name }
+        );
 
         if (error) throw error;
+        if (savedName !== name) {
+            throw new Error('The database did not confirm the saved household name.');
+        }
     }
 
     // checking if user belongs to a household 
