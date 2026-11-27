@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HouseholdSignup } from '../../components/household.signup/household.signup';
 import { HouseholdService } from '../../api/supabase/household.service';
 
 type HouseholdType = 'create' | 'join';
+type SetupStep = 'household' | 'member-name';
 
 @Component({
   imports: [HouseholdSignup, ReactiveFormsModule],
@@ -14,7 +15,8 @@ type HouseholdType = 'create' | 'join';
 })
 export class HouseholdSetup {
 
-  mode: HouseholdType = 'create';
+  mode = signal<HouseholdType>('create');
+  step = signal<SetupStep>('household');
 
   #householdService = inject(HouseholdService);
   #router = inject(Router);
@@ -25,57 +27,68 @@ export class HouseholdSetup {
   });
 
   // isLoading so user dont submit twice
-  isLoading = false;
-  errorMessage = '';
-  successMessage = '';
+  isLoading = signal(false);
+  errorMessage = signal('');
+  successMessage = signal('');
 
   // async returns a Promise
   async createSubmit(householdName: string): Promise<void> {
-    if (this.isLoading) return;
-    const fullName = this.getFullName();
-    if (!fullName) return;
+    if (this.isLoading()) return;
 
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
-    // try whats in the block
     try {
       await this.#householdService.createhousehold(householdName);
-      await this.#householdService.saveCurrentMemberName(fullName);
-      this.successMessage = 'Household created successfully!';
-      await this.#router.navigate(['/dashboard']);
-    } 
-    // catch any errors from the block 
+      this.step.set('member-name');
+      this.successMessage.set('Household created. Add your name to continue.');
+    }
     catch (error) {
       console.error('Create household failed:', error);
-      this.errorMessage = 'Unable to create household. Please try again.';
-    } 
-    // runs regardless of passing or failing 
+      this.errorMessage.set('Unable to create household. Please try again.');
+    }
     finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
   }
 
   async joinSubmit(inviteCode: string): Promise<void> {
-    if (this.isLoading) return;
-    const fullName = this.getFullName();
-    if (!fullName) return;
+    if (this.isLoading()) return;
 
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     try {
       await this.#householdService.joinHousehold(inviteCode);
-      await this.#householdService.saveCurrentMemberName(fullName);
-      this.successMessage = 'Successfully joined household!';
-      await this.#router.navigate(['/dashboard']);
+      this.step.set('member-name');
+      this.successMessage.set('You joined the household. Add your name to continue.');
     } catch (error) {
       console.error('Join household failed:', error);
-      this.errorMessage = 'Unable to join household. Check your invitation code.';
+      this.errorMessage.set('Unable to join household. Check your invitation code.');
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
+    }
+  }
+
+  async saveMemberName(): Promise<void> {
+    if (this.isLoading()) return;
+    const fullName = this.getFullName();
+    if (!fullName) return;
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    try {
+      await this.#householdService.saveCurrentMemberName(fullName);
+      await this.#router.navigate(['/dashboard']);
+    } catch (error) {
+      console.error('Saving household member name failed:', error);
+      this.errorMessage.set('Unable to save your name. Please try again.');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 

@@ -2,57 +2,72 @@
   <h1>Welcome to TapStock</h1>
   <p>Set up your household to start managing groceries together.</p>
 
-  <div class="name-field">
-    <label for="fullName">Your name</label>
-    <input
-      id="fullName"
-      type="text"
-      [formControl]="fullName"
-      placeholder="e.g. Juan Aviles"
-      autocomplete="name"
-    />
-    @if (fullName.touched && fullName.invalid) {
-      <small>Please enter your name (at least 2 characters).</small>
+  @if (step() === 'household') {
+    <div class="household-actions">
+      <button
+        type="button"
+        [attr.aria-pressed]="mode() === 'create'"
+        [disabled]="isLoading()"
+        (click)="mode.set('create')"
+      >
+        Create Household
+      </button>
+
+      <button
+        type="button"
+        [attr.aria-pressed]="mode() === 'join'"
+        [disabled]="isLoading()"
+        (click)="mode.set('join')"
+      >
+        Join Household
+      </button>
+    </div>
+
+    @if (mode() === 'create') {
+      <app-household-signup
+        [mode]="mode()"
+        (submitted)="createSubmit($event)"
+      />
+    } @else {
+      <app-household-signup
+        [mode]="mode()"
+        (submitted)="joinSubmit($event)"
+      />
     }
-  </div>
+  } @else {
+    <div class="name-field">
+      <label for="fullName">Your name</label>
+      <input
+        id="fullName"
+        type="text"
+        [formControl]="fullName"
+        placeholder="e.g. Juan Aviles"
+        autocomplete="name"
+      />
+      @if (fullName.touched && fullName.invalid) {
+        <small>Please enter your name (at least 2 characters).</small>
+      }
+    </div>
 
-  <div class="household-actions">
     <button
+      class="name-submit-button"
       type="button"
-      [attr.aria-pressed]="mode === 'create'"
-      (click)="mode = 'create'"
+      [disabled]="isLoading() || fullName.invalid"
+      (click)="saveMemberName()"
     >
-      Create Household
+      Continue
     </button>
-
-    <button
-      type="button"
-      [attr.aria-pressed]="mode === 'join'"
-      (click)="mode = 'join'"
-    >
-      Join Household
-    </button>
-  </div>
-
-  @if (mode === 'create') {
-    <!-- listening + passing event -->
-    <app-household-signup [mode]="mode" (submitted)="createSubmit($event)"></app-household-signup>
-  }
-
-  @if (mode === 'join') {
-      <!-- listening + passing event -->
-    <app-household-signup [mode]="mode" (submitted)="joinSubmit($event)"></app-household-signup>
   }
 </section>
 
-@if (isLoading) {
-  <p>Processing your request...</p>
+@if (isLoading()) {
+  <p role="status" aria-live="polite">Processing your request...</p>
 }
 
-@if (successMessage) {
-  <p>{{ successMessage }}</p>
+@if (successMessage()) {
+  <p role="status" aria-live="polite">{{ successMessage() }}</p>
 }
 
-@if (errorMessage) {
-  <p>{{ errorMessage }}</p>
+@if (errorMessage()) {
+  <p role="alert">{{ errorMessage() }}</p>
 }
